@@ -21,7 +21,8 @@ var dataSets = [
       'class':'css-class-for-data-set',
       'caption':'Название ряда данных'
     }
-  };
+  }
+]
 
 var chart = d3w.chart(
     dataSets, //набор данных
