@@ -1,0 +1,344 @@
+@ouiSelection: #e8f7ff;
+@ouiBlack: #3c3c3c;
+@ouiGray: #ededed;
+
+@timepadSold: #33799f;
+@timepadRegister: #a1d286;
+@timepadOrange: #fc330b;
+
+.d3w-chart {
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke-width: 1px;
+  stroke: @ouiBlack;
+}
+
+.line {
+  
+  fill: none;
+  stroke: @timepadSold;
+  stroke-width: 2px;
+
+}
+
+.d3w-l-crosshair {
+  display: none;
+  stroke: @ouiGray;
+  stroke-width: 1px;
+}
+
+.linehover {
+  fill: none;
+  stroke: rgba(0, 0, 0, 0);
+  stroke-width: 80px;
+}
+
+.c-dots {
+  cursor: pointer;
+}
+
+.graph {
+  margin: auto;
+  position: relative;
+}
+
+svg text {
+  font-size: 10px;
+}
+
+.chart {
+  &:hover {
+    .d3w-stackedbars-g {
+        opacity: .3;
+      &.hovered {
+        opacity: 1 !important;
+        .l-crosshair {
+          display: block;
+        }
+      }
+    }
+  }
+}
+
+.d3w-stackedbars-g {
+  -webkit-transition: opacity 200ms;
+  -moz-transition: opacity 200ms;
+  -ms-transition: opacity 200ms;
+  -o-transition: opacity 200ms;
+  transition: opacity 200ms;
+}
+
+.d3w-iaxis {
+  .domain {
+    display: none !important;
+  }
+  .tick {
+    line {
+      opacity: .2;
+    }
+  }
+}
+
+.d3w-tooltip {
+
+  display: none;
+
+  line-height: 18px;
+
+  padding: 5px;
+  background-color: rgba(255,255,255,.8);
+  font-size: 10px;
+  color: #000;
+
+  position: absolute;
+  top: 0;
+  left: 50%;
+
+  float: left;
+
+  .d3w-tooltip__text {
+    
+    vertical-align: middle;
+    &:after {
+      content: "";
+      display: block;
+      clear: both;
+    }
+  }
+
+  .d3w-tooltip__datasubset-value {
+    display: none;
+    float: right;
+    padding-left: 10px;
+    &.d3w-tooltip__datasubset-value_is_active {
+      display: block;
+    }
+  }
+
+  -webkit-transition: opacity 200ms ease;
+  -moz-transition: opacity 200ms ease;
+  -ms-transition: opacity 200ms ease;
+  -o-transition: opacity 200ms ease;
+  transition: opacity 200ms ease;
+
+  z-index: 200;
+
+}
+
+.d3w-legend {
+
+  display: block;
+
+  text-align: center;
+
+  line-height: 18px;
+
+  padding: 0  0 5px 0;
+
+  font-size: 10px;
+  color: #000;
+
+  position: relative;
+
+  width: 100%;
+
+  z-index: 200;
+
+  .d3w-legend__datasubset {
+    cursor: pointer;
+
+    position: relative;
+    display: inline-block;
+    margin-left: 3em;
+    .d3w-legend__datasubset-mark {
+      position: absolute;
+      left: -1.5em;
+      svg{
+        width: 10px;
+        height: 10px;
+      }
+    }
+
+    &:hover {
+      opacity: .5;
+    }
+
+  }
+
+
+}
+
+.d3w-hover {
+  cursor: pointer;
+  z-index: 300;
+}
+
+.d3w-js-muted {
+  circle {
+    fill: @ouiGray !important;
+
+    -webkit-transition: all 300ms ease-out;
+    -moz-transition: all 300ms ease-out;
+    -ms-transition: all 300ms ease-out;
+    -o-transition: all 300ms ease-out;
+    transition: all 300ms ease-out;
+  }
+  opacity: .5;
+
+
+}
+
+.d3w-wrapper {
+  position: relative;
+}
+
+//цвета
+.registrations {
+  &.line {
+    stroke: @timepadRegister;
+    stroke-width: 2px;
+  }
+  &.dot {
+    fill: @timepadRegister;
+  }
+  &.rect {
+    fill: @timepadRegister;
+  }
+  &.circle {
+    fill: @timepadRegister;
+  }
+}
+
+.tickets {
+  &.line {
+    stroke: @timepadSold;
+    stroke-width: 2px;
+  }
+  &.dot {
+    fill: @timepadSold;
+  }
+  &.rect {
+    fill: @timepadSold;
+  }
+  &.circle {
+    fill: @timepadSold;
+  }
+}
+
+.lulz {
+  &.line {
+    stroke: @timepadOrange;
+    stroke-width: 2px;
+  }
+  &.dot {
+    fill: @timepadOrange;
+  }
+  &.rect {
+    fill: @timepadOrange;
+  }
+  &.circle {
+    fill: @timepadOrange;
+  }
+}
+
+//график продаж
+
+.sites {
+  &.line {
+    stroke: #fdb462;
+    stroke-width: 2px;
+  }
+  &.dot {
+    fill: #fdb462;
+  }
+  &.rect {
+    fill: #fdb462;
+  }
+  &.circle {
+    fill: #fdb462;
+  }
+}
+
+.timepad {
+  &.line {
+    stroke: #1783d7;
+    stroke-width: 3px;
+  }
+  &.dot {
+    fill: #1783d7;
+  }
+  &.rect {
+    fill: #1783d7;
+  }
+  &.circle {
+    fill: #1783d7;
+  }
+}
+
+.partner {
+  &.line {
+    stroke: #60c3e3;
+    stroke-width: 2px;
+  }
+  &.dot {
+    fill: #60c3e3;
+  }
+  &.rect {
+    fill: #60c3e3;
+  }
+  &.circle {
+    fill: #60c3e3;
+  }
+}
+
+.autoletters {
+  &.line {
+    stroke: #fb4f4f;
+    stroke-width: 2px;
+  }
+  &.dot {
+    fill: #fb4f4f;
+  }
+  &.rect {
+    fill: #fb4f4f;
+  }
+  &.circle {
+    fill: #fb4f4f;
+  }
+}
+
+.socials {
+  &.line {
+    stroke: #64b30a;
+    stroke-width: 2px;
+  }
+  &.dot {
+    fill: #64b30a;
+  }
+  &.rect {
+    fill: #64b30a;
+  }
+  &.circle {
+    fill: #64b30a;
+  }
+}
+
+.other {
+  &.line {
+    stroke: #bebebe;
+    stroke-width: 2px;
+  }
+  &.dot {
+    fill: #bebebe;
+  }
+  &.rect {
+    fill: #bebebe;
+  }
+  &.circle {
+    fill: #bebebe;
+  }
+}
