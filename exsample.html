@@ -25,20 +25,20 @@
         Простой линейный график по времени
   		  <p class="b-subheader">Simple timeline linear chart</p>
       </h3>
-  		<div class="chart chart-1" style="width:610px;"></div>
+  		<div class="graph graph-1" style="width:610px;"></div>
     </p>
     <p>
       <h3 class="b-header">
         Более сложный линейный график
         <p class="b-subheader">More complex exsample of linear chart</p>
       </h3>
-      <div class="chart chart-true" style="width:610px;"></div>
+      <div class="graph graph-true" style="width:610px;"></div>
     </p>
     <p>
       <h3 class="b-header">Сгруппированные столбики
         <p class="b-subheader">Grouped bars chart</p>
       </h3>
-      <div class="chart chart-3" style="width:610px;"></div>
+      <div class="graph graph-3" style="width:610px;"></div>
     </p>
 		<script>
       
@@ -322,8 +322,8 @@
       ];
 
 
-      var topchart = d3w.chart(registersData, { 
-        canvas: d3.select('.chart-1').node(),
+      var topgraph = d3w.graph(registersData, { 
+        canvas: d3.select('.graph-1').node(),
         axises:{
           x:"linearSingleDateScrolled"
         },
@@ -528,21 +528,21 @@
         }
       ];
 
-      var truechart = d3w.chart(hits, { 
-        canvas: d3.select('.chart-true').node(),
+      var truegraph = d3w.graph(hits, { 
+        canvas: d3.select('.graph-true').node(),
         axises:{
           x:"linearSingleDateScrolled"
         },
         height: 220
       } );
-      // var topchart2 = d3w.chart(registersData2, { 
-      //   canvas: $('.chart-2'),
+      // var topgraph2 = d3w.graph(registersData2, { 
+      //   canvas: $('.graph-2'),
       //   type:"stakedbars"
       // } );
 
 
-      var topchart2 = d3w.chart(registersData3, { 
-        canvas: d3.select('.chart-3').node(),
+      var topgraph2 = d3w.graph(registersData3, { 
+        canvas: d3.select('.graph-3').node(),
         type:"groupedbars",
         axises:{
           x:"quantumSingleDateScrolled"

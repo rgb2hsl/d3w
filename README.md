@@ -2,7 +2,7 @@ d3w
 ===
 Библиотека, использующая d3.js для построения графиков из наборов данных по времени.
 
-Использование
+Базовые инструкции по использованию
 ---------
 1. Подключите [d3.js](http://d3js.org/)
 2. Подключите d3w.js
@@ -32,4 +32,8 @@ var chart = d3w.chart(
     }
   );
 ```
+
+Более подробно в [документации](https://github.com/ru-web-designer/d3w/wiki):
+* [Описание API](https://github.com/ru-web-designer/d3w/wiki/API)
+  * [d3w.chart](https://github.com/ru-web-designer/d3w/wiki/API#d3wchartdataset-options) — построение графиков
 
