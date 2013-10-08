@@ -339,7 +339,7 @@ d3w.axis.draw = function(obj,dataset) {
         typeFunction = typesFunctions[ obj.options.axises[axis] ];
       } else {
         //функция указана в настройках, но её нет в доступных
-        console.log("D3W: Unknown axis type!");
+        // console.log("D3W: Unknown axis type!");
       }
     } else {
       //в настройках нет данной оси, применяем дефолтный вариант
@@ -423,7 +423,7 @@ d3w.util.parseOptions = function(rawOptions) {
     if (rawOptions.type in d3w.types) {
       rawOptions.type = d3w.types[rawOptions.type];
     } else {
-      console.log("D3W: Unknown chart type.");
+      // console.log("D3W: Unknown chart type.");
       return false;
     }
   } else {
@@ -664,13 +664,14 @@ d3w.util.d3wGraph.meta.calculate.datumsCount = function(obj, dataset) {
 d3w.chart = function(dataset, options) {
   var drawFunction, d3wGraph;
 
-  console.log("D3W: d3w.chart INVOKED");
+  // console.log("D3W: d3w.chart INVOKED");
   //data
   if (typeof(dataset) == 'undefined') return false;
 
   //объект параметров
   if (!( options = d3w.util.parseOptions(options || {}) )) {
-    console.log("D3W: OOPS! chart options error");
+    // console.log("D3W: OOPS! chart options error");
+    return false;
   };
 
   //создаём объект-график
@@ -805,7 +806,7 @@ d3w.chart.line = function(obj,dataset) {
       .attr("y",0)
       .attr("x", function(d,i) {
 
-        // console.log(d);
+        console.log(d);
 
         var prev, next;
 
@@ -1227,8 +1228,8 @@ d3w.tooltip = {
         tooltip  
           .style("top", (y < obj.height/2 ? tooltipObj.scaleTop(y) : tooltipObj.scaleBot(y)) + "px");
           // .style("top", (y < obj.height/2 ? console.log("up") : console.log("down")) + "px");
-            // console.log(d3.event.offsetY - obj.options.margin.top);   
-            // console.log(obj.height);   
+            console.log(d3.event.offsetY - obj.options.margin.top);   
+            console.log(obj.height);   
       });
 
       tooltipObj.updateSet = tooltip.selectAll(".d3w-tooltip__datasubset-value");
