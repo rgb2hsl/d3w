@@ -14,7 +14,7 @@ d3w.types = {
   line: 0,
   stakedbars: 1,
   groupedbars: 2,
-  diagramRound: 1
+  roundDiagram: 3
 };
 
 
@@ -291,7 +291,7 @@ d3w.axis.util = {
         }
       };
       
-    } else if (type == d3w.types.diagramRound) {
+    } else if (type == d3w.types.roundDiagram) {
       return null;
     }
   },
@@ -326,7 +326,11 @@ d3w.axis.util = {
   }
 };
 d3w.axis.draw = function(obj,dataset) {
-  var axises = d3w.axis.util.axisTypes(obj.options.type), typeFunction;
+  var axises = d3w.axis.util.axisTypes(obj.options.type), typeFunction,
+      axisesLayer;
+
+  //если нет осей - дальше не продолжаем
+  if (!axises) return false;
 
   for (axis in axises) {
     //доступные типы осей для этого типа графика
@@ -334,12 +338,12 @@ d3w.axis.draw = function(obj,dataset) {
 
     //есть ли настройки для данной оси?
     if (axis in obj.options.axises) {
+
       if (obj.options.axises[axis] in typesFunctions) {
         //такая функция есть, применяем её
         typeFunction = typesFunctions[ obj.options.axises[axis] ];
       } else {
         //функция указана в настройках, но её нет в доступных
-        // console.log("D3W: Unknown axis type!");
       }
     } else {
       //в настройках нет данной оси, применяем дефолтный вариант
@@ -355,7 +359,6 @@ d3w.axis.draw = function(obj,dataset) {
 
   //создаём слой для осей
   axisesLayer = obj.svgCanvas.append("g").attr("class","d3w-axises");
-
   //отрисовываем все добавленные оси
   for (axisesKey in obj.meta.axis.objects) {
     
@@ -423,7 +426,6 @@ d3w.util.parseOptions = function(rawOptions) {
     if (rawOptions.type in d3w.types) {
       rawOptions.type = d3w.types[rawOptions.type];
     } else {
-      // console.log("D3W: Unknown chart type.");
       return false;
     }
   } else {
@@ -477,48 +479,41 @@ d3w.util.parseDate = d3.time.format("%d.%m.%Y").parse;
 
 
 
-d3w.util.d3wGraph = {};
-d3w.util.d3wGraph.make = function(options) {
+d3w.util.d3wChart = {};
+d3w.util.d3wChart.make = function(options) {
 
-  var d3wGraph = {};
-  d3wGraph.options = options;
-  d3wGraph.canvasElement = options.canvas;
-  d3wGraph.canvasElementSelection = d3.select(d3wGraph.canvasElement).classed("d3w-chart",true);
+  var d3wChart = {};
+  d3wChart.options = options;
+  d3wChart.canvasElement = options.canvas;
+  d3wChart.canvasElementSelection = d3.select(d3wChart.canvasElement).classed("d3w-chart",true);
 
-  d3wGraph.heightCanvas = options.height;
-  d3wGraph.widthCanvas = d3wGraph.canvasElement.scrollWidth;
+  d3wChart.heightCanvas = options.height;
+  d3wChart.widthCanvas = d3wChart.canvasElement.scrollWidth;
 
-  d3wGraph.width = d3wGraph.widthCanvas - options.margin.left - options.margin.right,
-  d3wGraph.height = d3wGraph.heightCanvas - options.margin.top - options.margin.bottom;
+  d3wChart.width = d3wChart.widthCanvas - options.margin.left - options.margin.right,
+  d3wChart.height = d3wChart.heightCanvas - options.margin.top - options.margin.bottom;
 
   //инициализируем основное svg-полотно
-  d3wGraph.svgCanvas = d3wGraph.canvasElementSelection.append("div").attr("class","d3w-wrapper").append("svg")
-    .attr("width", d3wGraph.width + options.margin.left + options.margin.right)
-    .attr("height", d3wGraph.height + options.margin.top + options.margin.bottom)
+  d3wChart.svgCanvas = d3wChart.canvasElementSelection.append("div").attr("class","d3w-wrapper").append("svg")
+    .attr("width", d3wChart.width + options.margin.left + options.margin.right)
+    .attr("height", d3wChart.height + options.margin.top + options.margin.bottom)
     .append("g")
     .attr("transform", "translate(" + options.margin.left + "," + options.margin.top + ")");
 
   //раздел для информации, необходимой для построения графика
-  d3wGraph.meta = {};
+  d3wChart.meta = {};
 
-  //refactor: переместиь туда, где считаются оси
-  //количество горизонтальных тиков
-    d3wGraph.meta.horisontalTickWidth = 40;
-    d3wGraph.meta.horisontalTicksCount = Math.round(d3wGraph.width/(  d3wGraph.meta.horisontalTickWidth +   d3wGraph.meta.horisontalTickWidth/2));
-  //количество вертикальных тиков
-    d3wGraph.meta.verticalTickHeight = 15;
-    d3wGraph.meta.verticalTicksCount = Math.round(d3wGraph.height/(  d3wGraph.meta.verticalTickHeight +   d3wGraph.meta.verticalTickHeight/2.5));
-
-  return d3wGraph;
+  return d3wChart;
 
 }
 
-d3w.util.d3wGraph.meta = {};
-d3w.util.d3wGraph.meta.calculate = function(obj, dataset) {
+d3w.util.d3wChart.meta = {};
+d3w.util.d3wChart.meta.calculate = function(obj, dataset) {
   var type = obj.options.type;
   if (type == d3w.types.line) {
     //линейный график
-    d3w.util.d3wGraph.meta.calculate
+    d3w.util.d3wChart.meta.calculate
+      .axisTicksCount(obj)
       .datumsCount(obj,dataset)
       .collectAllDates(obj,dataset)
       .minAndMax(obj,dataset);
@@ -526,7 +521,8 @@ d3w.util.d3wGraph.meta.calculate = function(obj, dataset) {
       .recatangularAxises(obj,dataset);
   } else if (type == d3w.types.stakedbars) {
     //стекедбары
-    d3w.util.d3wGraph.meta.calculate
+    d3w.util.d3wChart.meta.calculate
+      .axisTicksCount(obj)
       .simultaneousSums(obj,dataset)
       .collectAllDates(obj,dataset)
       .minAndMax(obj,dataset);
@@ -535,7 +531,8 @@ d3w.util.d3wGraph.meta.calculate = function(obj, dataset) {
       .recatangularAxises(obj,dataset);
   } else if (type == d3w.types.groupedbars) {
     //групедбары
-    d3w.util.d3wGraph.meta.calculate
+    d3w.util.d3wChart.meta.calculate
+      .axisTicksCount(obj)
       .collectAllDates(obj,dataset)
       .minAndMax(obj,dataset)   ;
 
@@ -546,7 +543,7 @@ d3w.util.d3wGraph.meta.calculate = function(obj, dataset) {
 
 //создаёт уникальный массив всех неповторящихся дат
 //заодно парсим даты
-d3w.util.d3wGraph.meta.calculate.collectAllDates = function(obj, dataset) {
+d3w.util.d3wChart.meta.calculate.collectAllDates = function(obj, dataset) {
   var data;
   obj.meta.allDates = [];
   for (var index in dataset) {
@@ -562,14 +559,25 @@ d3w.util.d3wGraph.meta.calculate.collectAllDates = function(obj, dataset) {
   //обеспечиваем уникальность набора дат
     //obj.meta.allDates = $.unique( meta.allDates );
   obj.meta.allDates = d3.scale.ordinal().domain(obj.meta.allDates).domain();
-  return d3w.util.d3wGraph.meta.calculate;
+  return d3w.util.d3wChart.meta.calculate;
 };
 
+//считает число горизонтальных и вертикальных тиков для осей
+d3w.util.d3wChart.meta.calculate.axisTicksCount = function (obj) {
+  //количество горизонтальных тиков
+    obj.meta.horisontalTickWidth = 40;
+    obj.meta.horisontalTicksCount = Math.round(obj.width/(  obj.meta.horisontalTickWidth +   obj.meta.horisontalTickWidth/2));
+  //количество вертикальных тиков
+    obj.meta.verticalTickHeight = 15;
+    obj.meta.verticalTicksCount = Math.round(obj.height/(  obj.meta.verticalTickHeight +   obj.meta.verticalTickHeight/2.5));
+    return d3w.util.d3wChart.meta.calculate;
+}
+
 //считает общий минимум и максимум по всем наборам
-d3w.util.d3wGraph.meta.calculate.minAndMax = function(obj, dataset) {
+d3w.util.d3wChart.meta.calculate.minAndMax = function(obj, dataset) {
 
   //dependency
-  d3w.util.d3wGraph.meta.calculate.minAndMax.dataset(obj, dataset);
+  d3w.util.d3wChart.meta.calculate.minAndMax.dataset(obj, dataset);
 
   obj.meta.minAndMax = {
     x: {
@@ -589,11 +597,11 @@ d3w.util.d3wGraph.meta.calculate.minAndMax = function(obj, dataset) {
       })
     }
   }
-  return d3w.util.d3wGraph.meta.calculate;
+  return d3w.util.d3wChart.meta.calculate;
 };
 
   //считает для каждого набора данных его минимум и максимум по значениям и датам
-  d3w.util.d3wGraph.meta.calculate.minAndMax.dataset = function(obj, dataset) {
+  d3w.util.d3wChart.meta.calculate.minAndMax.dataset = function(obj, dataset) {
     for (var i = 0, d; i < dataset.length; i++) {
       d = dataset[i];
       if (!('meta' in d)) d.meta = {};
@@ -608,11 +616,11 @@ d3w.util.d3wGraph.meta.calculate.minAndMax = function(obj, dataset) {
           } 
         };
     };
-  return d3w.util.d3wGraph.meta.calculate;
+  return d3w.util.d3wChart.meta.calculate;
   };
 
 //считает для каждого набора данных его минимум и максимум по значениям и датам
-d3w.util.d3wGraph.meta.calculate.datasetClasses = function(obj, dataset) {
+d3w.util.d3wChart.meta.calculate.datasetClasses = function(obj, dataset) {
   for (var i = 0, d; i < dataset.length; i++) {
     d = dataset[i];
     if (!('meta' in d)) d.meta = {};
@@ -627,11 +635,11 @@ d3w.util.d3wGraph.meta.calculate.datasetClasses = function(obj, dataset) {
         } 
       };
   };
-return d3w.util.d3wGraph.meta.calculate;
+return d3w.util.d3wChart.meta.calculate;
 };
 
 //считает для всего набора кумулятивные дновременные по датам суммы (чтобы определить реальный макмум суммы значений)
-d3w.util.d3wGraph.meta.calculate.simultaneousSums = function(obj, dataset) {
+d3w.util.d3wChart.meta.calculate.simultaneousSums = function(obj, dataset) {
   //массив сумм значений (для стекедбаров)
   obj.meta.simultaneousSums = [];
 
@@ -644,15 +652,15 @@ d3w.util.d3wGraph.meta.calculate.simultaneousSums = function(obj, dataset) {
 
   obj.meta.simultaneousSumsMax = d3.max(obj.meta.simultaneousSums);
   obj.meta.simultaneousSumsMin = d3.min(obj.meta.simultaneousSums);
-  return d3w.util.d3wGraph.meta.calculate;
+  return d3w.util.d3wChart.meta.calculate;
 };
 
-d3w.util.d3wGraph.meta.calculate.datumsCount = function(obj, dataset) {
+d3w.util.d3wChart.meta.calculate.datumsCount = function(obj, dataset) {
   obj.meta.datumsCount = {
     min: d3.min(dataset,function(d){ return d.data.length; }),
     max: d3.max(dataset,function(d){ return d.data.length; })
   }
-  return d3w.util.d3wGraph.meta.calculate;
+  return d3w.util.d3wChart.meta.calculate;
 };
 
 
@@ -662,31 +670,29 @@ d3w.util.d3wGraph.meta.calculate.datumsCount = function(obj, dataset) {
 
 
 d3w.chart = function(dataset, options) {
-  var drawFunction, d3wGraph;
+  var drawFunction, d3wChart;
 
-  // console.log("D3W: d3w.chart INVOKED");
   //data
   if (typeof(dataset) == 'undefined') return false;
 
   //объект параметров
   if (!( options = d3w.util.parseOptions(options || {}) )) {
-    // console.log("D3W: OOPS! chart options error");
     return false;
   };
 
   //создаём объект-график
-  d3wGraph = d3w.util.d3wGraph.make(options);
+  d3wChart = d3w.util.d3wChart.make(options);
 
   //подстчёт метаинформации
-  d3w.util.d3wGraph.meta.calculate(d3wGraph,dataset);
+  d3w.util.d3wChart.meta.calculate(d3wChart,dataset);
 
   //рисование осей
-  d3w.axis.draw(d3wGraph,dataset);
+  d3w.axis.draw(d3wChart,dataset);
 
   //получим функцию на рисование графика и вызовем её
-  d3w.chart.chartTypes(d3wGraph.options.type).call(null, d3wGraph, dataset);
+  d3w.chart.chartTypes(d3wChart.options.type).call(null, d3wChart, dataset);
 
-  return d3wGraph;
+  return d3wChart;
 
 }
 
@@ -706,7 +712,8 @@ d3w.chart.chartTypes = function(type) {
     case d3w.types.groupedbars:
       return d3w.chart.groupedbars;
     break;
-    case d3w.types.diagramRound:
+    case d3w.types.roundDiagram:
+      return d3w.chart.roundDiagram;
     break;
   }
 }
@@ -805,8 +812,6 @@ d3w.chart.line = function(obj,dataset) {
     hovers
       .attr("y",0)
       .attr("x", function(d,i) {
-
-        console.log(d);
 
         var prev, next;
 
@@ -915,6 +920,72 @@ d3w.chart.line = function(obj,dataset) {
         });
   }
 
+};
+
+d3w.chart.roundDiagram = function(obj,dataset) {
+
+  var r = (obj.meta.radius = Math.min(obj.height - obj.options.margin.top - obj.options.margin.bottom, obj.width - obj.options.margin.left - obj.options.margin.right) * 0.7),
+      lp = (obj.meta.labelPadding = 10),
+      lr = r + lp,
+      donut = (obj.meta.donut = d3.layout.pie()),
+      arc = (obj.arc = d3.svg.arc().innerRadius(r * 0.3).outerRadius(r)),
+      chartGridRoot = obj.svgCanvas.append("g").attr("class","d3w-round-grid"),
+      chartRoot = obj.svgCanvas.append("g").attr("class","chart d3w-round"),
+      chartHoversRoot = obj.svgCanvas.append("g").attr("class","d3w-chart-hovers"),
+      color = d3.scale.category10(),
+      arcs,
+      dClass,
+      hovers;
+
+  chartRoot.datum(dataset);
+  chartGridRoot.datum(dataset);
+
+  arcs = chartRoot.selectAll(".d3w-round__arc")
+    .data(obj.meta.donut.value(function(d) {
+      return d.data;
+    }))
+    .enter()
+      .append("g")
+      .attr("class", "d3w-round__arc")
+      .attr("transform", "translate(" + (r + lp) + "," + r + ")");
+
+  arcs.append("path")
+    .attr("class", function(d) {
+      return d.data.options.class;
+    })
+    .classed("arc",true)
+    .attr("fill",function(d,i) {
+      return color(i);
+    })
+    .attr("d", arc);
+
+  labels = chartGridRoot.selectAll(".d3w-round-grid__label")
+    .data(obj.meta.donut.value(function(d) {
+      return d.data;
+    }))
+    .enter()
+      .append("g")
+      .attr("class", "d3w-round-grid__label")
+      .attr("transform", "translate(" + (r + lp) + "," + r + ")");
+
+  labels.append("svg:text")
+    .attr("transform", function(d) {
+        var c = arc.centroid(d),
+            x = c[0],
+            y = c[1],
+            // pythagorean theorem for hypotenuse
+            h = Math.sqrt(x*x + y*y);
+        return "translate(" + (x/h * lr) +  ',' +
+           (y/h * lr) +  ")"; 
+    })
+    .attr("dy", ".35em")
+    .attr("text-anchor", function(d) {
+        // are we past the center?
+        return (d.endAngle + d.startAngle)/2 > Math.PI ?
+            "end" : "start";
+    })
+    .text(function(d, i) { return d.data.options.caption; });
+    
 };
 
 d3w.chart.groupedbars = function(obj,dataset) {
@@ -1129,18 +1200,18 @@ d3w.legend = {
       })
       .order();
 
-    legendObj.d3wGraph = obj;
+    legendObj.d3wChart = obj;
 
     return legendObj;
     
   },
   //для использования, график должен иметь метод hideShowToggle
   extendAddShowHideToggles: function(legendObj,dataset) {
-    if (!("hideShowToggle" in legendObj.d3wGraph)) return false;
+    if (!("hideShowToggle" in legendObj.d3wChart)) return false;
     legendObj.element.selectAll(".d3w-legend__datasubset")
       .data(dataset, function(d) { return d.options.class; })
       .on("click",function(d){
-            if (legendObj.d3wGraph.hideShowToggle.call(legendObj.d3wGraph,d.options.class) == -1) 
+            if (legendObj.d3wChart.hideShowToggle.call(legendObj.d3wChart,d.options.class) == -1) 
               d3.select(this).classed("d3w-js-muted",true);
             else
               d3.select(this).classed("d3w-js-muted",false);
@@ -1226,10 +1297,7 @@ d3w.tooltip = {
 
         tooltipHeight = parseInt(obj.canvasElementSelection.select(".d3w-tooltip").style('height'));
         tooltip  
-          .style("top", (y < obj.height/2 ? tooltipObj.scaleTop(y) : tooltipObj.scaleBot(y)) + "px");
-          // .style("top", (y < obj.height/2 ? console.log("up") : console.log("down")) + "px");
-            console.log(d3.event.offsetY - obj.options.margin.top);   
-            console.log(obj.height);   
+          .style("top", (y < obj.height/2 ? tooltipObj.scaleTop(y) : tooltipObj.scaleBot(y)) + "px"); 
       });
 
       tooltipObj.updateSet = tooltip.selectAll(".d3w-tooltip__datasubset-value");
