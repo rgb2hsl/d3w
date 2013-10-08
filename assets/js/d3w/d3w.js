@@ -671,6 +671,7 @@ d3w.chart = function(dataset, options) {
   //объект параметров
   if (!( options = d3w.util.parseOptions(options || {}) )) {
     // console.log("D3W: OOPS! chart options error");
+    return false;
   };
 
   //создаём объект-график
@@ -805,7 +806,7 @@ d3w.chart.line = function(obj,dataset) {
       .attr("y",0)
       .attr("x", function(d,i) {
 
-        // console.log(d);
+        console.log(d);
 
         var prev, next;
 
@@ -1227,8 +1228,8 @@ d3w.tooltip = {
         tooltip  
           .style("top", (y < obj.height/2 ? tooltipObj.scaleTop(y) : tooltipObj.scaleBot(y)) + "px");
           // .style("top", (y < obj.height/2 ? console.log("up") : console.log("down")) + "px");
-            // console.log(d3.event.offsetY - obj.options.margin.top);   
-            // console.log(obj.height);   
+            console.log(d3.event.offsetY - obj.options.margin.top);   
+            console.log(obj.height);   
       });
 
       tooltipObj.updateSet = tooltip.selectAll(".d3w-tooltip__datasubset-value");
