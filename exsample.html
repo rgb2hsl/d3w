@@ -22,13 +22,6 @@
 	<div>
     <p>
       <h3 class="b-header">
-        Багнутый график
-        <p class="b-subheader">Simple timeline linear chart</p>
-      </h3>
-      <div class="chart chart-buggy" style="width:610px;"></div>
-    </p>
-    <p>
-      <h3 class="b-header">
         Простой линейный график по времени
   		  <p class="b-subheader">Simple timeline linear chart</p>
       </h3>
@@ -54,16 +47,6 @@
       <div class="chart round" style="width:600px;"></div>
     </p>
 		<script>
-      
-      var buggyDataset = [{"data":[{"y":1,"x":"07.10.2013"},{"y":0,"x":"06.10.2013"},{"y":0,"x":"05.10.2013"},{"y":0,"x":"04.10.2013"},{"y":0,"x":"03.10.2013"},{"y":0,"x":"02.10.2013"},{"y":0,"x":"01.10.2013"},{"y":1,"x":"30.09.2013"},{"y":0,"x":"29.09.2013"},{"y":0,"x":"28.09.2013"}],"options":{"class":"ticket-chart-regs","caption":"Тикеты"}},{"data":[{"y":0,"x":"07.10.2013"},{"y":0,"x":"06.10.2013"},{"y":0,"x":"05.10.2013"},{"y":0,"x":"04.10.2013"},{"y":0,"x":"03.10.2013"},{"y":0,"x":"02.10.2013"},{"y":0,"x":"01.10.2013"},{"y":0,"x":"30.09.2013"},{"y":0,"x":"29.09.2013"},{"y":0,"x":"28.09.2013"}],"options":{"class":"ticket-chart-payments","caption":"Платежи"}}];
-
-      var buggyChart = d3w.chart(buggyDataset, { 
-        canvas: d3.select('.chart-buggy').node(),
-        type: 'groupedbars',
-        axises:{
-          x:"quantumSingleDateScrolled"
-        },
-      } );
 
       var registersData = [
       {
