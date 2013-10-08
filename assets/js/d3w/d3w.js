@@ -31,13 +31,14 @@ d3w.axis.time.quantumSingleDateScrolled = function(obj,dataset,axis) {
       ticks = obj.meta.horisontalTicksCount,
       tickValues = [],
       timeTickFormat,
-      startDate = d3.min(obj.meta.allDates);
+      startDate = d3.min(obj.meta.allDates),
+      endDate = d3.max(obj.meta.allDates);
 
   obj.meta.axis.timeTickFormat = function(d) {
     return d3w.regexp.month.en2ruDo(
       d3.time.format("%d %b").call(
         null,
-        d3.time.day.offset(startDate, -d)) 
+        d3.time.day.offset(endDate, -d)) 
       ); 
     };
 
@@ -45,7 +46,7 @@ d3w.axis.time.quantumSingleDateScrolled = function(obj,dataset,axis) {
 
   //общее число дней в наших данных
   //мы используем scale ordinal где каждому дню соответствует позиция
-  daysCount = obj.meta.axis.daysCount = d3.time.days(d3.min(obj.meta.allDates), d3.max(obj.meta.allDates)).length + 1;
+  daysCount = obj.meta.axis.daysCount = d3.time.days(startDate, endDate).length + 1;
   datesDomain = obj.meta.axis.datesDomain = d3.range(daysCount);
 
   //создаём скейл
@@ -513,6 +514,8 @@ d3w.util.d3wChart.meta.calculate = function(obj, dataset) {
   if (type == d3w.types.line) {
     //линейный график
     d3w.util.d3wChart.meta.calculate
+      .parseAllDates(dataset)
+      .orderDatums(dataset)
       .axisTicksCount(obj)
       .datumsCount(obj,dataset)
       .collectAllDates(obj,dataset)
@@ -522,6 +525,8 @@ d3w.util.d3wChart.meta.calculate = function(obj, dataset) {
   } else if (type == d3w.types.stakedbars) {
     //стекедбары
     d3w.util.d3wChart.meta.calculate
+      .parseAllDates(dataset)
+      .orderDatums(dataset)
       .axisTicksCount(obj)
       .simultaneousSums(obj,dataset)
       .collectAllDates(obj,dataset)
@@ -532,6 +537,8 @@ d3w.util.d3wChart.meta.calculate = function(obj, dataset) {
   } else if (type == d3w.types.groupedbars) {
     //групедбары
     d3w.util.d3wChart.meta.calculate
+      .parseAllDates(dataset)
+      .orderDatums(dataset)
       .axisTicksCount(obj)
       .collectAllDates(obj,dataset)
       .minAndMax(obj,dataset)   ;
@@ -541,6 +548,36 @@ d3w.util.d3wChart.meta.calculate = function(obj, dataset) {
   }
 };
 
+d3w.util.d3wChart.meta.calculate.orderDatums = function(dataset) {
+  var dataObjIndex, dataObj;
+  for (dataObjIndex in dataset) {
+    dataObj = dataset[dataObjIndex];
+    
+    //если это массив - сортируем
+    //TODO возможность указать компоратор
+    if (dataObj.data instanceof Array) {
+      dataObj.data.sort(function(a,b){
+        if (a.x < b.x) return -1;
+        else if (b.x < a.x) return 1;
+        else return 0;
+      });
+    }
+  };
+  return d3w.util.d3wChart.meta.calculate;
+};
+
+d3w.util.d3wChart.meta.calculate.parseAllDates = function(dataset) {
+  var data;
+  for (var index in dataset) {
+    for(var dataIndex in dataset[index].data) {
+      data = dataset[index].data[dataIndex];
+      //парсим по формату
+      data.x = d3w.util.parseDate(data.x);
+    }
+  }
+  return d3w.util.d3wChart.meta.calculate;
+}; 
+
 //создаёт уникальный массив всех неповторящихся дат
 //заодно парсим даты
 d3w.util.d3wChart.meta.calculate.collectAllDates = function(obj, dataset) {
@@ -549,7 +586,7 @@ d3w.util.d3wChart.meta.calculate.collectAllDates = function(obj, dataset) {
   for (var index in dataset) {
     for(var dataIndex in dataset[index].data) {
       data = dataset[index].data[dataIndex];
-      obj.meta.allDates.push(data.x = d3w.util.parseDate(data.x));
+      obj.meta.allDates.push(data.x = data.x);
     }
   }
   //jquery way
@@ -985,7 +1022,7 @@ d3w.chart.roundDiagram = function(obj,dataset) {
             "end" : "start";
     })
     .text(function(d, i) { return d.data.options.caption; });
-    
+
 };
 
 d3w.chart.groupedbars = function(obj,dataset) {
