@@ -339,7 +339,7 @@ d3w.axis.draw = function(obj,dataset) {
         typeFunction = typesFunctions[ obj.options.axises[axis] ];
       } else {
         //функция указана в настройках, но её нет в доступных
-        console.log("D3W: Unknown axis type!");
+        // console.log("D3W: Unknown axis type!");
       }
     } else {
       //в настройках нет данной оси, применяем дефолтный вариант
@@ -423,7 +423,7 @@ d3w.util.parseOptions = function(rawOptions) {
     if (rawOptions.type in d3w.types) {
       rawOptions.type = d3w.types[rawOptions.type];
     } else {
-      console.log("D3W: Unknown chart type.");
+      // console.log("D3W: Unknown chart type.");
       return false;
     }
   } else {
@@ -664,13 +664,13 @@ d3w.util.d3wGraph.meta.calculate.datumsCount = function(obj, dataset) {
 d3w.chart = function(dataset, options) {
   var drawFunction, d3wGraph;
 
-  console.log("D3W: d3w.chart INVOKED");
+  // console.log("D3W: d3w.chart INVOKED");
   //data
   if (typeof(dataset) == 'undefined') return false;
 
   //объект параметров
   if (!( options = d3w.util.parseOptions(options || {}) )) {
-    console.log("D3W: OOPS! chart options error");
+    // console.log("D3W: OOPS! chart options error");
   };
 
   //создаём объект-график
