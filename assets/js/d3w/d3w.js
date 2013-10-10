@@ -1208,6 +1208,14 @@ d3w.legend = {
     legendObj.element = obj.canvasElementSelection.insert("div",":first-child")
         .attr("class","d3w-legend");
 
+    if ("legend" in obj.options) {
+      if("caption" in obj.options.legend) {
+        legendObj.element.append("div")
+          .attr("class","d3w-legend__caption")
+          .text(obj.options.legend.caption);
+      }
+    }
+
     legendObj.element.selectAll(".d3w-legend__datasubset")
       .data(dataset, function(d) { return d.options.class; })
       .enter()
