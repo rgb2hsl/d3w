@@ -961,8 +961,14 @@ d3w.chart.line = function(obj,dataset) {
 
 d3w.chart.roundDiagram = function(obj,dataset) {
 
-  var r = (obj.meta.radius = Math.min(obj.height - obj.options.margin.top - obj.options.margin.bottom, obj.width - obj.options.margin.left - obj.options.margin.right) * 0.7),
-      lp = (obj.meta.labelPadding = 10),
+  var drawLabels = ("labels" in obj.options && obj.options.labels) || !("labels" in obj.options),
+      r = (
+        obj.meta.radius = Math.min(
+          obj.height - obj.options.margin.top - obj.options.margin.bottom,
+          obj.width - obj.options.margin.left - obj.options.margin.right
+          ) * (drawLabels ? 0.3 : 0.5)
+        ),
+      lp = drawLabels ? obj.meta.labelPadding = 10 : obj.meta.labelPadding = 0,
       lr = r + lp,
       donut = (obj.meta.donut = d3.layout.pie()),
       arc = (obj.arc = d3.svg.arc().innerRadius(r * 0.3).outerRadius(r)),
@@ -996,6 +1002,7 @@ d3w.chart.roundDiagram = function(obj,dataset) {
     })
     .attr("d", arc);
 
+  if (drawLabels) {
   labels = chartGridRoot.selectAll(".d3w-round-grid__label")
     .data(obj.meta.donut.value(function(d) {
       return d.data;
@@ -1005,23 +1012,24 @@ d3w.chart.roundDiagram = function(obj,dataset) {
       .attr("class", "d3w-round-grid__label")
       .attr("transform", "translate(" + (r + lp) + "," + r + ")");
 
-  labels.append("svg:text")
-    .attr("transform", function(d) {
-        var c = arc.centroid(d),
-            x = c[0],
-            y = c[1],
-            // pythagorean theorem for hypotenuse
-            h = Math.sqrt(x*x + y*y);
-        return "translate(" + (x/h * lr) +  ',' +
-           (y/h * lr) +  ")"; 
-    })
-    .attr("dy", ".35em")
-    .attr("text-anchor", function(d) {
-        // are we past the center?
-        return (d.endAngle + d.startAngle)/2 > Math.PI ?
-            "end" : "start";
-    })
-    .text(function(d, i) { return d.data.options.caption; });
+    labels.append("svg:text")
+      .attr("transform", function(d) {
+          var c = arc.centroid(d),
+              x = c[0],
+              y = c[1],
+              // pythagorean theorem for hypotenuse
+              h = Math.sqrt(x*x + y*y);
+          return "translate(" + (x/h * lr) +  ',' +
+             (y/h * lr) +  ")"; 
+      })
+      .attr("dy", ".35em")
+      .attr("text-anchor", function(d) {
+          // are we past the center?
+          return (d.endAngle + d.startAngle)/2 > Math.PI ?
+              "end" : "start";
+      })
+      .text(function(d, i) { return d.data.options.caption; });
+  }
 
 };
 

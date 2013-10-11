@@ -559,7 +559,7 @@
 
 var pieReady = [
         {
-          'data' : 1100,
+          'data' : 1,
           'options' : {
                 'class':'sites',
                 'caption':'Сайты'
@@ -605,7 +605,9 @@ var pieReady = [
       var roundDiagram = d3w.chart(pieReady, { 
         canvas: d3.select('.round').node(),
         type:"roundDiagram",
-        height: 200
+        height: 150,
+        labels: false,
+        margin:{top:0,right:0,bottom:0,left:0}
       } );
 
     </script>
