@@ -245,11 +245,21 @@ d3w.axis.time.linear = function(obj,dataset,axis) {
 }
 
 d3w.axis.linear = function(obj,dataset,axis) {
+  var domain = [ obj.meta.minAndMax[axis].min, obj.meta.minAndMax[axis].max ];
+
+  //предустановки домена
+  if (
+    "domains" in obj.options &&
+    axis in obj.options.domains && 
+    "min" in obj.options.domains[axis]
+  ){
+    domain[0] = obj.options.domains[axis].min;
+  };
 
   //создаём скейл
   scale = d3.scale.linear()
     .range( obj.meta.axis.axisRanges[axis] )
-    .domain( [ obj.meta.minAndMax[axis].min, obj.meta.minAndMax[axis].max ] );
+    .domain( domain );
 
   if (!("scales" in obj.meta.axis)) obj.meta.axis.scales = {};
   obj.meta.axis.scales[axis] = scale;
