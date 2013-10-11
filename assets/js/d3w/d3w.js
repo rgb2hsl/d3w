@@ -932,20 +932,24 @@ d3w.chart.line = function(obj,dataset) {
   })
 
   //добавляем легенду
-  obj.legend = d3w.legend.add(obj,dataset)
+  if (!("legend" in obj.options && "show" in obj.options.legend && !obj.options.legend.show)) {
 
-  //организуем скрывашки
-  obj.hideShowToggle = function(dataClass){
-    var result;
-    this.canvasElementSelection.selectAll(".d3w-showHide." + dataClass)
-      .each(function(d){
-        if (d3.select(this).style("display") != "none") { d3.select(this).style("display","none"); result = -1; }
-        else { d3.select(this).style("display","block"); result = 1; }
-      });
-      return result;
+    obj.legend = d3w.legend.add(obj,dataset)
+
+    //организуем скрывашки
+    obj.hideShowToggle = function(dataClass){
+      var result;
+      this.canvasElementSelection.selectAll(".d3w-showHide." + dataClass)
+        .each(function(d){
+          if (d3.select(this).style("display") != "none") { d3.select(this).style("display","none"); result = -1; }
+          else { d3.select(this).style("display","block"); result = 1; }
+        });
+        return result;
+    }
+
+    d3w.legend.extendAddShowHideToggles(obj.legend,dataset);
+  
   }
-
-  d3w.legend.extendAddShowHideToggles(obj.legend,dataset);
 
   //если у нас мультиосевая система
   if (obj.options.axises.x == "linearSingleDateScrolled") {
@@ -1192,21 +1196,23 @@ d3w.chart.groupedbars = function(obj,dataset) {
   })
 
   //добавляем легенду
-  obj.legend = d3w.legend.add(obj,dataset)
+  if (!("legend" in obj.options && "show" in obj.options.legend && !obj.options.legend.show)) {
+    
+    obj.legend = d3w.legend.add(obj,dataset)
 
-  //организуем скрывашки
-  obj.hideShowToggle = function(dataClass){
-    var result;
-    this.canvasElementSelection.selectAll(".d3w-showHide." + dataClass)
-      .each(function(d){
-        if (d3.select(this).style("display") != "none") { d3.select(this).style("display","none"); result = -1; }
-        else { d3.select(this).style("display","block"); result = 1; }
-      });
-      return result;
+    //организуем скрывашки
+    obj.hideShowToggle = function(dataClass){
+      var result;
+      this.canvasElementSelection.selectAll(".d3w-showHide." + dataClass)
+        .each(function(d){
+          if (d3.select(this).style("display") != "none") { d3.select(this).style("display","none"); result = -1; }
+          else { d3.select(this).style("display","block"); result = 1; }
+        });
+        return result;
+    }
+
+    d3w.legend.extendAddShowHideToggles(obj.legend,dataset);
   }
-
-  d3w.legend.extendAddShowHideToggles(obj.legend,dataset);
-
   //скрываем ненужные оси
   d3w.axis.util.hideAllIAxises.call(obj.svgCanvas.node());
 
