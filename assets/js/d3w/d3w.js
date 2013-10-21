@@ -993,7 +993,7 @@ d3w.chart.line = function(obj,dataset) {
 d3w.chart.roundDiagram = function(obj,dataset) {
 
   if (obj.meta.zeroFilled) {
-    var svg = d3.select(obj.svgCanvas.node().parentNode).attr("height",150),
+    var svg = d3.select(obj.svgCanvas.node().parentNode).attr("height",150 + obj.options.margin.top + obj.options.margin.bottom),
         r = 50
         donut = (obj.meta.donut = d3.layout.pie()),
         arc = (obj.arc = d3.svg.arc().innerRadius(r * 0.3).outerRadius(r)),
