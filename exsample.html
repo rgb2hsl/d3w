@@ -46,6 +46,18 @@
       </h3>
       <div class="chart round" style="width:600px;"></div>
     </p>
+    <p>
+      <h3 class="b-header">Круговая с подписями
+        <p class="b-subheader">Donut\round diagram with labels</p>
+      </h3>
+      <div class="chart round-labels" style="width:600px;"></div>
+    </p>
+    <p>
+      <h3 class="b-header">Круговая с легендой
+        <p class="b-subheader">Donut\round diagram with labels</p>
+      </h3>
+      <div class="chart round-legend" style="width:600px;"></div>
+    </p>
 		<script>
 
       var registersData = [
@@ -567,28 +579,28 @@
 
 var pieReady = [
         {
-          'data' : 1,
+          'data' : 30,
           'options' : {
                 'class':'sites',
                 'caption':'Сайты'
               }
         },
         {
-          'data' : 8812,
+          'data' : 40,
           'options' : {
                 'class':'timepad',
                 'caption':'Продвижение TimePad'
               }
         },
         {
-          'data' : 2012,
+          'data' : 300,
           'options' : {
                 'class':'partner',
                 'caption':'Партнёры'
               }
         },
         {
-          'data' : 1200,
+          'data' : 50,
           'options' : {
                 'class':'autoletters',
                 'caption':'Рассылки'
@@ -614,6 +626,23 @@ var pieReady = [
         canvas: d3.select('.round').node(),
         type:"roundDiagram",
         height: 150,
+        legend: {show: false},
+        labels: false,
+        margin:{top:0,right:0,bottom:0,left:0}
+      } );
+
+      var roundDiagramLabels = d3w.chart(pieReady, { 
+        canvas: d3.select('.round-labels').node(),
+        type:"roundDiagram",
+        height: 250,
+        legend: {show: false},
+        margin:{top:0,right:0,bottom:0,left:0}
+      } );
+
+      var roundDiagramLegend = d3w.chart(pieReady, { 
+        canvas: d3.select('.round-legend').node(),
+        type:"roundDiagram",
+        height: 250,
         labels: false,
         margin:{top:0,right:0,bottom:0,left:0}
       } );

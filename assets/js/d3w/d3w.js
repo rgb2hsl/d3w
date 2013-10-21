@@ -980,10 +980,10 @@ d3w.chart.roundDiagram = function(obj,dataset) {
         obj.meta.radius = Math.min(
           obj.height - obj.options.margin.top - obj.options.margin.bottom,
           obj.width - obj.options.margin.left - obj.options.margin.right
-          ) * (drawLabels ? 0.3 : 0.5)
-        ),
-      lp = drawLabels ? obj.meta.labelPadding = 10 : obj.meta.labelPadding = 0,
-      lr = r + lp,
+          ) * 0.5
+        )  - (drawLabels ? 20 : 0),
+      lp = drawLabels ? obj.meta.labelPadding = 20 : obj.meta.labelPadding = 0,
+      lr = r + lp / 2,
       donut = (obj.meta.donut = d3.layout.pie()),
       arc = (obj.arc = d3.svg.arc().innerRadius(r * 0.3).outerRadius(r)),
       chartGridRoot = obj.svgCanvas.append("g").attr("class","d3w-round-grid"),
@@ -992,7 +992,11 @@ d3w.chart.roundDiagram = function(obj,dataset) {
       color = d3.scale.category10(),
       arcs,
       dClass,
-      hovers;
+      hovers,
+      cx = obj.width / 2,
+      cy = obj.height / 2,
+      force,
+      labelsNodes = [];
 
   chartRoot.datum(dataset);
   chartGridRoot.datum(dataset);
@@ -1004,45 +1008,86 @@ d3w.chart.roundDiagram = function(obj,dataset) {
     .enter()
       .append("g")
       .attr("class", "d3w-round__arc")
-      .attr("transform", "translate(" + (r + lp) + "," + r + ")");
+      .attr("transform", "translate(" + cx + "," + (r + lp) + ")");
 
   arcs.append("path")
     .attr("class", function(d) {
       return d.data.options.class;
     })
     .classed("arc",true)
+    .classed("d3w-showHide",true)
     .attr("fill",function(d,i) {
       return color(i);
     })
     .attr("d", arc);
 
   if (drawLabels) {
-  labels = chartGridRoot.selectAll(".d3w-round-grid__label")
-    .data(obj.meta.donut.value(function(d) {
-      return d.data;
-    }))
-    .enter()
-      .append("g")
-      .attr("class", "d3w-round-grid__label")
-      .attr("transform", "translate(" + (r + lp) + "," + r + ")");
 
-    labels.append("svg:text")
-      .attr("transform", function(d) {
-          var c = arc.centroid(d),
-              x = c[0],
-              y = c[1],
-              // pythagorean theorem for hypotenuse
-              h = Math.sqrt(x*x + y*y);
-          return "translate(" + (x/h * lr) +  ',' +
-             (y/h * lr) +  ")"; 
-      })
+    labels = chartGridRoot.selectAll(".d3w-round-grid__label")
+      .data(obj.meta.donut.value(function(d) {
+        return d.data;
+      }))
+      .enter()
+        .append("g")
+        .filter(function(d){
+          return Math.abs(d.endAngle - d.startAngle) > (Math.PI / 18);
+        })
+        .attr("class", "d3w-round-grid__label")
+        .attr("transform", "translate(" + cx + "," + (r + lp) + ")");
+
+    var texts = labels
+      .append("svg:text")
       .attr("dy", ".35em")
       .attr("text-anchor", function(d) {
           // are we past the center?
           return (d.endAngle + d.startAngle)/2 > Math.PI ?
               "end" : "start";
       })
-      .text(function(d, i) { return d.data.options.caption; });
+      .text(function(d, i) {
+        return d.data.options.caption;
+      })
+      .each(function(d,i) {
+
+          var c = arc.centroid(d),
+              x = c[0],
+              y = c[1],
+              h = Math.sqrt(x*x + y*y);
+
+          labelsNodes[i] = {
+            x: (x/h * lr),
+            y: (y/h * lr),
+            fixed: false
+          };
+
+          labelsNodes[i+labels.size()] = {
+            x: (x/h * r),
+            y: (y/h * r),
+            fixed: true
+          };
+          d3.select(this)
+            .attr("x",labelsNodes[i].x)
+            .attr("y",labelsNodes[i].y);
+      });
+
+  }
+
+  //добавляем легенду
+  if (!("legend" in obj.options && "show" in obj.options.legend && !obj.options.legend.show)) {
+    
+    obj.legend = d3w.legend.add(obj,dataset)
+
+    //организуем скрывашки
+    obj.hideShowToggle = function(dataClass){
+      var result;
+      this.canvasElementSelection.selectAll(".d3w-showHide." + dataClass)
+        .each(function(d){
+          if (d3.select(this).style("display") != "none") { d3.select(this).style("display","none"); result = -1; }
+          else { d3.select(this).style("display","block"); result = 1; }
+        });
+        return result;
+    }
+
+    d3w.legend.extendAddShowHideToggles(obj.legend,dataset);
   }
 
 };
