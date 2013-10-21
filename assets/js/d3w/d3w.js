@@ -551,11 +551,28 @@ d3w.util.d3wChart.meta.calculate = function(obj, dataset) {
       .orderDatums(dataset)
       .axisTicksCount(obj)
       .collectAllDates(obj,dataset)
-      .minAndMax(obj,dataset)   ;
+      .minAndMax(obj,dataset);
 
     d3w.axis.util.meta.calculate
       .recatangularAxises(obj,dataset);
+  } else if (type == d3w.types.roundDiagram) {
+    d3w.util.d3wChart.meta.calculate
+      .zeroFilled(obj,dataset);
   }
+};
+
+d3w.util.d3wChart.meta.calculate.zeroFilled = function(obj, dataset) {
+  var zeroFilled = true;
+  dataset.forEach(function(d){
+    var data = d.data;
+    if (data instanceof Array) {
+      if (data.length > 0) zeroFilled = false;
+    } else if (data) {
+      zeroFilled = false;
+    }
+  });
+  obj.meta.zeroFilled = zeroFilled;
+  return d3w.util.d3wChart.meta.calculate;
 };
 
 d3w.util.d3wChart.meta.calculate.orderDatums = function(dataset) {
@@ -975,6 +992,59 @@ d3w.chart.line = function(obj,dataset) {
 
 d3w.chart.roundDiagram = function(obj,dataset) {
 
+  if (obj.meta.zeroFilled) {
+    var svg = d3.select(obj.svgCanvas.node().parentNode).attr("height",150),
+        r = 50
+        donut = (obj.meta.donut = d3.layout.pie()),
+        arc = (obj.arc = d3.svg.arc().innerRadius(r * 0.3).outerRadius(r)),
+        chartRoot = obj.svgCanvas.append("g").attr("class","chart d3w-round"),
+        color = d3.scale.category10(),
+        arcs,
+        dClass,
+        hovers,
+        cx = obj.width / 2,
+        cy = obj.height / 2,
+        color = d3.scale.ordinal()
+          .domain([0, 1, 2])
+          .range(["#ddd","#ccc","#aaa"]);
+
+
+    dataset = [];
+    for (var i = 0; i < 3; i++) {
+      dataset.push({data:Math.round(Math.random()*10)});
+    };
+    
+    chartRoot.datum(dataset);
+
+    arcs = chartRoot.selectAll(".d3w-round__arc")
+      .data(obj.meta.donut.value(function(d) {
+        return d.data;
+      }))
+      .enter()
+        .append("g")
+        .attr("class", "d3w-round__arc")
+        .attr("transform", "translate(" + cx  + ",85)");
+
+    arcs.append("path")
+      .classed("arc",true)
+      .classed("d3w-showHide",true)
+      .attr("fill",function(d,i) {
+        return color(i);
+      })
+      .attr("d", arc);
+
+    chartRoot
+      .append("svg:text")
+      .text("Недостаточно данных для графика")
+      .attr("transform", "translate(" + cx + ", 5)")
+      .attr("text-anchor","middle ")
+      .attr("dy","1em")
+      .style("font-size","1em");
+    
+    return;
+
+  }
+
   var drawLabels = ("labels" in obj.options && obj.options.labels) || !("labels" in obj.options),
       r = (
         obj.meta.radius = Math.min(
@@ -1067,7 +1137,7 @@ d3w.chart.roundDiagram = function(obj,dataset) {
           d3.select(this)
             .attr("x",labelsNodes[i].x)
             .attr("y",labelsNodes[i].y);
-      });
+    });
 
   }
 

@@ -54,9 +54,15 @@
     </p>
     <p>
       <h3 class="b-header">Круговая с легендой
-        <p class="b-subheader">Donut\round diagram with labels</p>
+        <p class="b-subheader">Donut\round diagram with legend</p>
       </h3>
       <div class="chart round-legend" style="width:600px;"></div>
+    </p>
+    <p>
+      <h3 class="b-header">Круговая с нулевыми значениями
+        <p class="b-subheader">Donut\round diagram with zero-fill</p>
+      </h3>
+      <div class="chart round-zero" style="width:600px;"></div>
     </p>
 		<script>
 
@@ -647,6 +653,37 @@ var pieReady = [
         margin:{top:0,right:0,bottom:0,left:0}
       } );
 
+var pieReadyZerofill = [
+        {
+          'data' : 0,
+          'options' : {
+                'class':'sites',
+                'caption':'Сайты'
+              }
+        },
+        {
+          'data' : 0,
+          'options' : {
+                'class':'timepad',
+                'caption':'Продвижение TimePad'
+              }
+        },
+        {
+          'data' : 0,
+          'options' : {
+                'class':'partner',
+                'caption':'Партнёры'
+              }
+        }];
+
+      var roundDiagramLegend = d3w.chart(pieReadyZerofill, { 
+        canvas: d3.select('.round-zero').node(),
+        type:"roundDiagram",
+        height: 250,
+        labels: false,
+        margin:{top:0,right:0,bottom:0,left:0}
+      } );
+      
     </script>
 	</div>
 </p>
