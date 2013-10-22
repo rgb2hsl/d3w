@@ -548,6 +548,7 @@ d3w.util.d3wChart.meta.calculate = function(obj, dataset) {
     //групедбары
     d3w.util.d3wChart.meta.calculate
       .parseAllDates(dataset)
+      .zeroFilled(obj,dataset)
       .orderDatums(dataset)
       .axisTicksCount(obj)
       .collectAllDates(obj,dataset)
@@ -566,7 +567,12 @@ d3w.util.d3wChart.meta.calculate.zeroFilled = function(obj, dataset) {
   dataset.forEach(function(d){
     var data = d.data;
     if (data instanceof Array) {
-      if (data.length > 0) zeroFilled = false;
+      if (data.length > 0) {
+        //проверяем на заполненность
+        data.forEach(function(datum,i){
+          if ("y" in datum && datum.y) zeroFilled = false;
+        });
+      };
     } else if (data) {
       zeroFilled = false;
     }
@@ -1182,152 +1188,174 @@ d3w.chart.groupedbars = function(obj,dataset) {
   barWidth = x.rangeBand()/dataset.length;
   obj.meta.stakedbars = { "barWidth" : barWidth };
 
-  //рисуем для всех наборов данных их линию
-  for (dataObjIndex in dataset) {
+  if (obj.meta.zeroFilled) {
 
-    dobj = dataset[dataObjIndex];
-    dClass = ("class" in dobj.options ? dobj.options.class : "");
+    obj.svgCanvas.selectAll(".d3w-axises").style("opacity",0.3);
+    chartRoot
+      .append("svg:text")
+      .text("Недостаточно данных для графика")
+      .attr("transform", "translate(" + (obj.width/2) + ", " + (obj.height/2 - 10) + ")")
+      .attr("text-anchor","middle ")
+      .attr("dy","1em")
+      .style("font-size","1em");
 
-    barOffset = barWidth * dataObjIndex;
+  } else {
+  
+    //рисуем для всех наборов данных их столбики
+    for (dataObjIndex in dataset) {
 
-    xClosure = function(d) {
-      return x(d3.time.days(d.x,d3.max(obj.meta.allDates)).length) + barOffset;
-    };
-    yClosure = function(d) {
-      return y(d.y) - 1;
-    };
+      dobj = dataset[dataObjIndex];
+      dClass = ("class" in dobj.options ? dobj.options.class : "");
 
-    //создаём группу для набора данных
-    chart = chartRoot
-      .append("g")
-      .attr("class","d3w-groupedbars__dataset d3w-showHide")
-      .classed(dClass,true);
+      barOffset = barWidth * dataObjIndex;
 
-    //создаём группу для набора данных
-    chartGrid = chartGridRoot
-      .append("g")
-      .attr("class","d3w-groupedbars__dataset-grid d3w-showHide")
-      .classed(dClass,true);
+      xClosure = function(d) {
+        return x(d3.time.days(d.x,d3.max(obj.meta.allDates)).length) + barOffset;
+      };
+      yClosure = function(d) {
+        return y(d.y) - 1;
+      };
 
-    //рисование столбиков
-    chart
-      .selectAll(".rect")
-      .data(dobj.data.reverse())
-      .enter()
-        .append("rect")
-        .attr("x", xClosure)
-        .attr("y", yClosure)
-        .attr("height", function(d) { return obj.height - y(d.y); })
-        .attr("width", barWidth )
-        .attr("class", "rect")
-        .classed(dClass,true)
-        .each(function(rd){
-          rd.class = dClass;
-          d3.select(this).datum(rd);
-        });
+      //создаём группу для набора данных
+      chart = chartRoot
+        .append("g")
+        .attr("class","d3w-groupedbars__dataset d3w-showHide")
+        .classed(dClass,true);
 
-    //вспомогательные линии
-    chartGrid
-      .selectAll(".d3w-l-crosshair")
-      .data(dobj.data.reverse())
-      .enter()
-        .append("line")
-        .attr("class","d3w-l-crosshair")
-        .attr("x1", 1)
-        .attr("x2", xClosure)
-        .attr("y1", yClosure)
-        .attr("y2", yClosure)
-        .on("mouseenter", function(){
-          event.stopPropagation();
-        });
+      //создаём группу для набора данных
+      chartGrid = chartGridRoot
+        .append("g")
+        .attr("class","d3w-groupedbars__dataset-grid d3w-showHide")
+        .classed(dClass,true);
 
-    //ховербары
-    // chartHoversRoot.selectAll(".d3w-hover")
-    //   .data(dobj.data.reverse(), function(d){ return d.x })
-    //   .enter()
-    //     .append("rect")
-    //     .attr("class", "d3w-hover d3w-tooltip-observer");
+      //рисование столбиков
+      chart
+        .selectAll(".rect")
+        .data(dobj.data.reverse())
+        .enter()
+          .append("rect")
+          .attr("x", xClosure)
+          .attr("y", yClosure)
+          .attr("height", function(d) { return obj.height - y(d.y); })
+          .attr("width", barWidth )
+          .attr("class", "rect")
+          .classed(dClass,true)
+          .each(function(rd){
+            rd.class = dClass;
+            d3.select(this).datum(rd);
+          });
 
-    //ховербары
-    chartHoversRoot.selectAll(".d3w-hover")
-      .data(dobj.data.reverse(), function(d){ return d.x })
-      .enter()
-        .append("rect")
-        .attr("class","d3w-hover d3w-tooltip-observer");
-        
-    hovers = chartHoversRoot.selectAll(".d3w-hover");    
-    hovers
-      .attr("x", function(d) { return x(d3.time.days(d.x,d3.max(obj.meta.allDates)).length); })
-      .attr("y", 0)
-      .attr("height", obj.height)
-      .attr("width", x.rangeBand()*(10/8) )
-      .style("opacity","0")
-      .each(function(d){
-        if (!("observers" in this)) this.observers = [];
-        this.observers.push({
-          hiddens: chartGrid.selectAll(".d3w-l-crosshair").filter(function(e){ return e.x == d.x; }),
-          rects: chart.selectAll(".rect").filter(function(e){ return e.x == d.x; })
-        });
-      })
-      .on("mouseenter",function(d){
-        var tooltip;
-        for (var i = 0; i < this.observers.length; i++) {
-          this.observers[i].hiddens
-            .style("display","block");
-          if (tooltip = this.tooltip) {
-            this.observers[i].rects.each(function(rectData){
-              tooltip.updateSet
-                .filter(function(e){
-                  return e == rectData.class;
-                })
-                .text(rectData.y);
-            });
-          }
+      //вспомогательные линии
+      chartGrid
+        .selectAll(".d3w-l-crosshair")
+        .data(dobj.data.reverse())
+        .enter()
+          .append("line")
+          .attr("class","d3w-l-crosshair")
+          .attr("x1", 1)
+          .attr("x2", xClosure)
+          .attr("y1", yClosure)
+          .attr("y2", yClosure)
+          .on("mouseenter", function(){
+            event.stopPropagation();
+          });
+
+      //ховербары
+      // chartHoversRoot.selectAll(".d3w-hover")
+      //   .data(dobj.data.reverse(), function(d){ return d.x })
+      //   .enter()
+      //     .append("rect")
+      //     .attr("class", "d3w-hover d3w-tooltip-observer");
+
+      //ховербары
+      chartHoversRoot.selectAll(".d3w-hover")
+        .data(dobj.data.reverse(), function(d){ return d.x })
+        .enter()
+          .append("rect")
+          .attr("class","d3w-hover d3w-tooltip-observer");
           
-        }
-        //покажем нужную ось
-        obj.svgCanvas.selectAll(".x.axis")
-          .style("display","none")
-          .filter(function(ad){
-            return ad.position == d3.time.days(d.x,d3.max(obj.meta.allDates)).length || ad.position == 0;
-          })
-          .style("display","block");
-      })
-      .on("mouseleave",function(d){
-        for (var i = 0; i < this.observers.length; i++) {
-          this.observers[i].hiddens
-            .style("display","none");
-        }
-      });
+      hovers = chartHoversRoot.selectAll(".d3w-hover");    
+      hovers
+        .attr("x", function(d) { return x(d3.time.days(d.x,d3.max(obj.meta.allDates)).length); })
+        .attr("y", 0)
+        .attr("height", obj.height)
+        .attr("width", x.rangeBand()*(10/8) )
+        .style("opacity","0")
+        .each(function(d){
+          if (!("observers" in this)) this.observers = [];
+          this.observers.push({
+            hiddens: chartGrid.selectAll(".d3w-l-crosshair").filter(function(e){ return e.x == d.x; }),
+            rects: chart.selectAll(".rect").filter(function(e){ return e.x == d.x; })
+          });
+        })
+        .on("mouseenter",function(d){
+          var tooltip;
+          for (var i = 0; i < this.observers.length; i++) {
+            this.observers[i].hiddens
+              .style("display","block");
+            if (tooltip = this.tooltip) {
+              this.observers[i].rects.each(function(rectData){
+                tooltip.updateSet
+                  .filter(function(e){
+                    return e == rectData.class;
+                  })
+                  .text(rectData.y);
+              });
+            }
+            
+          }
+          //покажем нужную ось
+          obj.svgCanvas.selectAll(".x.axis")
+            .style("display","none")
+            .filter(function(ad){
+              return ad.position == d3.time.days(d.x,d3.max(obj.meta.allDates)).length || ad.position == 0;
+            })
+            .style("display","block");
+        })
+        .on("mouseleave",function(d){
+          for (var i = 0; i < this.observers.length; i++) {
+            this.observers[i].hiddens
+              .style("display","none");
+          }
+        });
+    }
+
+
+    //добавляем тултип
+    var tooltip = obj.tooltip = d3w.tooltip.add(obj,dataset);
+
+    //для заполнения полей
+    chartHoversRoot.selectAll(".d3w-hover").each(function(){
+      this.tooltip = tooltip;
+    })
+
+    
   }
-
-
-  //добавляем тултип
-  var tooltip = obj.tooltip = d3w.tooltip.add(obj,dataset);
-
-  //для заполнения полей
-  chartHoversRoot.selectAll(".d3w-hover").each(function(){
-    this.tooltip = tooltip;
-  })
 
   //добавляем легенду
   if (!("legend" in obj.options && "show" in obj.options.legend && !obj.options.legend.show)) {
     
     obj.legend = d3w.legend.add(obj,dataset)
 
-    //организуем скрывашки
-    obj.hideShowToggle = function(dataClass){
-      var result;
-      this.canvasElementSelection.selectAll(".d3w-showHide." + dataClass)
-        .each(function(d){
-          if (d3.select(this).style("display") != "none") { d3.select(this).style("display","none"); result = -1; }
-          else { d3.select(this).style("display","block"); result = 1; }
-        });
-        return result;
+    if (!obj.meta.zeroFilled) {
+  
+      //организуем скрывашки
+      obj.hideShowToggle = function(dataClass){
+        var result;
+        this.canvasElementSelection.selectAll(".d3w-showHide." + dataClass)
+          .each(function(d){
+            if (d3.select(this).style("display") != "none") { d3.select(this).style("display","none"); result = -1; }
+            else { d3.select(this).style("display","block"); result = 1; }
+          });
+          return result;
+      }
+
+      d3w.legend.extendAddShowHideToggles(obj.legend,dataset);
+      
     }
 
-    d3w.legend.extendAddShowHideToggles(obj.legend,dataset);
   }
+
   //скрываем ненужные оси
   d3w.axis.util.hideAllIAxises.call(obj.svgCanvas.node());
 
